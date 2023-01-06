@@ -1,13 +1,15 @@
-import { GetServerSideProps, GetStaticProps } from "next";
-import { getSession, useSession } from "next-auth/react";
-import { getPrismicClient } from "../../../services/prismic";
-import { RichText } from "prismic-dom";
+import { useEffect } from "react";
+import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { RichText } from "prismic-dom";
+import { ParsedUrlQuery } from "querystring";
+
+import { getPrismicClient } from "../../../services/prismic";
 
 import styles from "../post.module.scss";
-import Link from "next/link";
-import { useEffect } from "react";
-import { useRouter } from "next/router";
 
 interface PostPreviewProps {
   post: {
@@ -55,15 +57,19 @@ export default function PostPreview({ post }: PostPreviewProps) {
   );
 }
 
-export const getStaticPaths = () => {
+export const getStaticPaths: GetStaticPaths = async () => {
   return {
     paths: [],
     fallback: "blocking",
   };
 };
 
+interface IParams extends ParsedUrlQuery {
+  slug: string;
+}
+
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const { slug } = params;
+  const { slug } = params as IParams;
 
   const prismic = getPrismicClient();
 
@@ -96,5 +102,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     props: {
       post,
     },
+    revalidate: 60 * 30, // 30 minutes
   };
 };

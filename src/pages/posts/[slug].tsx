@@ -5,6 +5,7 @@ import { RichText } from "prismic-dom";
 import Head from "next/head";
 
 import styles from "./post.module.scss";
+import { ParsedUrlQuery } from "querystring";
 
 interface PostProps {
   post: {
@@ -36,12 +37,16 @@ export default function Post({ post }: PostProps) {
   );
 }
 
+interface IParams extends ParsedUrlQuery {
+  slug: string;
+}
+
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   params,
 }) => {
   const session = await getSession({ req });
-  const { slug } = params;
+  const { slug } = params as IParams;
 
   if (!session?.activeSubscription) {
     return {
